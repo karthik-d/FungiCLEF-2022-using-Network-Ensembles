@@ -47,7 +47,7 @@ os.chdir(os.path.join('/', 'content', 'drive', 'MyDrive', 'Research', 'LifeCLEF\
 '''
 """
 
-from efficientnet.efficientnet.model import EfficientNetB6
+from efficientnet.efficientnet.model import EfficientNetB4
 
 import tensorflow as tf
 import keras.utils
@@ -57,6 +57,9 @@ import os
 from skimage import io, transform, color
 from PIL import Image
 import pandas as pd 
+
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
 print(tf.config.list_physical_devices('GPU'))
 print("GPU Count: ", len(tf.config.list_physical_devices('GPU')))
@@ -70,6 +73,7 @@ check=[]
 class InputSequencer(tf.keras.utils.Sequence):
 
 	def __init__(self, base_path=None, shuffle=True):
+		self.label_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'metalabels')
 		self.BATCH_SIZE = BATCH_SIZE
 		self.IMG_SIZE = IMG_SIZE
 		self.shuffle = shuffle
@@ -87,6 +91,11 @@ class InputSequencer(tf.keras.utils.Sequence):
 		self.meta_cols = [ 'countryCode', 'level1Name', 'level2Name', 'locality', 'Substrate', 'Habitat']
 		#self.indexes = np.arange(len(self.image_paths))
 		self.on_epoch_end()
+		self.meta_encoders = []
+		for col in self.meta_cols:
+			encoder = LabelEncoder()
+			encoder.classes_ = np.load(os.path.join(self.label_path, col+'_classes.npy'), allow_pickle=True)
+			self.meta_encoders.append(encoder)	
 
 	def on_epoch_end(self, *args):
 		self.check = []
@@ -99,6 +108,13 @@ class InputSequencer(tf.keras.utils.Sequence):
 	def __len__(self):
 		return self.num_data_pts // self.BATCH_SIZE
 		pass
+		
+	def encode_metadata(self, df_part):
+		encoded = []
+		for encoder, col in zip(self.meta_encoders, self.meta_cols):
+			encoded.append(encoder.transform(df_part[col]))
+		return encoded
+			
 
 	def __getitem__(self, idx):
 		"""Returns tuple (input, target) correspond to batch #idx."""
@@ -135,8 +151,6 @@ class InputSequencer(tf.keras.utils.Sequence):
 				#print("append")
 				self.check.append(path)
 			
-			#print(os.path.isfile(os.path.join(base_path, path)))
-			#img=io.imread(os.path.join(base_path, path))
 			try:
 				img = Image.open(os.path.join(base_path, path)).convert('RGB')
 			except FileNotFoundError:
@@ -147,22 +161,22 @@ class InputSequencer(tf.keras.utils.Sequence):
 			
 			# print(os.path.join(base_path,path))
 			image_data = np.array(np.asarray(img_res), dtype='uint8')
-			#batch_meta.append(np.array(new_row[self.meta_cols].to_list()[0]))
+			batch_meta.append(self.encode_metadata(new_row))
 			batch_images.append(image_data)
 			batch_labels.append(label)
 			# print(f"{len(batch_images)} of {self.BATCH_SIZE} images prepared")
 			#print(path)
 	 	
 		#print(np.array(batch_images).shape)
-		return (np.array(batch_images), np.array(batch_labels))
+		return ([np.array(batch_images), np.squeeze(np.array(batch_meta))], np.array(batch_labels))
 
 data_path = os.path.join('Datasets/DF20')
 data_reader = InputSequencer(base_path=data_path)
-imgs, labels = data_reader[5]
-print(imgs.shape)
+inps, labels = data_reader[5]
+print(inps[0])
+print(inps[1])
 print(labels)
-print(check)
-print(len(check))
+print("TESTED")
 
 """
 check_img = imgs[0]
@@ -212,7 +226,7 @@ from tensorflow.keras.layers import Dense, Flatten, Input, Concatenate
 from keras import backend as K
 
 #model = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(*IMG_SIZE, 3))
-model = EfficientNetB6(
+model = EfficientNetB4(
         include_top=False,
         weights='imagenet',
         input_shape=(*IMG_SIZE, 3)
@@ -222,16 +236,18 @@ model = EfficientNetB6(
 flatten = Flatten()
 new_layer2 = Dense(1604, activation='softmax', name='my_dense_2')
 
-meta_in = Input(shape=(5,))
+meta_in = Input(shape=(len(data_reader.meta_cols),))
+img_in = model.input
 
-inp2 = model.input
-#out2 = new_layer2(Concatenate(axis=0)([flatten(model.output), meta_in])
-out2 = new_layer2(flatten(model.output))
+print(model.output.shape)
+print(meta_in.shape)
+out = new_layer2(Concatenate(axis=-1)([flatten(model.output), meta_in]))
+#out2 = new_layer2(flatten(model.output))
 
 
-opt = keras.optimizers.Adam(learning_rate=3e-07)
+opt = keras.optimizers.Adam(learning_rate=1e-04)
 
-model2 = Model(inp2, out2)
+model2 = Model((img_in, meta_in), out)
 model2.summary()
 model2.compile(
     optimizer=opt,
@@ -240,10 +256,10 @@ model2.compile(
 )
 
 
-weight_save = keras.callbacks.ModelCheckpoint('weights/weights-efficientnetb6/weights-epoch-4_{epoch:03d}.h5', save_weights_only=True, period=1)
+weight_save = keras.callbacks.ModelCheckpoint('weights/weights-efficientnetb4-wmeta/weights-epoch-1_{epoch:03d}.h5', save_weights_only=True, period=1)
 on_epoch_end_call = keras.callbacks.LambdaCallback(on_epoch_end=data_reader.on_epoch_end())
 
-model2.load_weights('/home/miruna/LifeCLEF/FungiCLEF/weights/weights-efficientnetb6/weights-epoch-3_005.h5')
+#model2.load_weights('/home/miruna/LifeCLEF/FungiCLEF/weights/weights-efficientnetb4-wmeta/weights-epoch-1_007.h5')
 model2.fit(data_reader,
     epochs=10,
     verbose=1,
