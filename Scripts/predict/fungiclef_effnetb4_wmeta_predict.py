@@ -102,15 +102,6 @@ while not df.empty:
     batch_meta_encoded = []
     batch_images = []
     for idx, row in all_imgs.iterrows():
-        #Read metadata
-        meta_encoded = []
-        for encoder, col in zip(meta_encoders, meta_cols_order):
-            try:
-                meta_encoded.append(encoder.transform([row[meta_cols[col]]]))	
-            except ValueError:
-                meta_encoded.append(np.array([0])) # Unseen
-                unseen_errors += 1
-        batch_meta_encoded.append(np.squeeze(np.array(meta_encoded)))
         # Read image
         path = row['filename']
         try:
@@ -121,6 +112,15 @@ while not df.empty:
             print(skipping," skipping ", path)
             continue
         batch_images.append(image)
+        #Read metadata
+        meta_encoded = []
+        for encoder, col in zip(meta_encoders, meta_cols_order):
+            try:
+                meta_encoded.append(encoder.transform([row[meta_cols[col]]]))	
+            except:
+                meta_encoded.append(np.array([0])) # Unseen
+                unseen_errors += 1
+        batch_meta_encoded.append(np.squeeze(np.array(meta_encoded)))
         instance_cnt += 1
     
     # Make prediction in batches
