@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
-# -*- coding: utf-8 -*-
-
-
 from efficientnet.efficientnet.model import EfficientNetB4
 
 import tensorflow as tf
@@ -124,6 +118,8 @@ while not df.empty:
             # Make prediction
         image_in = np.expand_dims(image, axis=0)
         meta_in = np.expand_dims(meta_encoded, axis=0)
+
+        # Predict in batches
         predict_probs += model2.predict([image_in, meta_in])[0]
         instance_cnt += 1
     # Cumulative probabilities
