@@ -47,11 +47,11 @@ model2 = Model((img_in, meta_in), out)
 model2.summary()
 
 #work from here
-model2.load_weights('weights/weights-efficientnetb4-wmeta/weights-epoch-1_003.h5')
+model2.load_weights('weights/weights-efficientnetb4-wmeta/weights-epoch-3_002.h5')
 
 # RUN PREDICTIONS
 
-op_file = open('effb4predictions_wmeta_1_003.csv', mode='w')
+op_file = open('effb4predictions_wmeta_3_002.csv', mode='w')
 op_writer = csv.writer(op_file, delimiter=',', quotechar='"')
 op_writer.writerow(['ObservationId', 'ClassId', 'Class_top3', 'Confidence_top3'])  
 skipping = 0
@@ -124,6 +124,8 @@ while not df.empty:
         instance_cnt += 1
     
     # Make prediction in batches
+    batch_images = np.array(batch_images)
+    batch_meta_encoded = np.array(batch_meta_encoded)
     predict_probs = np.sum(model2.predict([batch_images, batch_meta_encoded]), axis=0)/instance_cnt    
     predicted_class = np.argmax(predict_probs)
     
@@ -139,7 +141,6 @@ while not df.empty:
         print("SAVING DATA")
         print(time.time()-time_)
         time_ = time.time()
-        break
 
 op_file.close()
 print("Unseen Errors:", unseen_errors)
