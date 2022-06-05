@@ -90,12 +90,17 @@ time_ = time.time()
 
 unseen_errors = 0
 while not df.empty:
+
     i += 1
     observation_id = df.iloc[0]['ObservationId']
     all_imgs = df.loc[df['ObservationId']==observation_id, :]
     num_rows = len(all_imgs)
     predict_probs = np.zeros((1604,))
     instance_cnt = 0
+
+    # Load each obs_id into a batch
+    batch_meta_encoded = []
+    batch_images = []
     for idx, row in all_imgs.iterrows():
         #Read metadata
         meta_encoded = []
@@ -105,7 +110,7 @@ while not df.empty:
             except ValueError:
                 meta_encoded.append(np.array([0])) # Unseen
                 unseen_errors += 1
-        meta_encoded = np.squeeze(np.array(meta_encoded))
+        batch_meta_encoded.append(np.squeeze(np.array(meta_encoded)))
         # Read image
         path = row['filename']
         try:
@@ -115,29 +120,26 @@ while not df.empty:
             skipping += 1
             print(skipping," skipping ", path)
             continue
-            # Make prediction
-        image_in = np.expand_dims(image, axis=0)
-        meta_in = np.expand_dims(meta_encoded, axis=0)
-
-        # Predict in batches
-        predict_probs += model2.predict([image_in, meta_in])[0]
+        batch_images.append(image)
         instance_cnt += 1
-    # Cumulative probabilities
-    predict_probs = np.array(predict_probs)/instance_cnt
+    
+    # Make prediction in batches
+    predict_probs = np.sum(model2.predict([batch_images, batch_meta_encoded]), axis=0)/instance_cnt    
     predicted_class = np.argmax(predict_probs)
+    
     # Store in file
     top_3_idx = np.argpartition(predict_probs, -3)[-3:]
     op_writer.writerow([observation_id, predicted_class, top_3_idx, predict_probs[top_3_idx]])
     df.drop(df[df['ObservationId']==observation_id].index, inplace = True)
+
+    # Verbosity
     if(i%50==0):
         print(num_rows, '/', len(df))
         print([observation_id, predicted_class])
-        #outputDF = pd.DataFrame(modelPredictionsArray, columns = ['ObservationId', 'class_id'])
-        #outputDF.to_csv('/kaggle/working/outputdata.csv', index=False, mode='a', header=False)
-        #print(outputDF)
-        #modelPredictionsArray = []
         print("SAVING DATA")
         print(time.time()-time_)
         time_ = time.time()
+        break
+
 op_file.close()
 print("Unseen Errors:", unseen_errors)
