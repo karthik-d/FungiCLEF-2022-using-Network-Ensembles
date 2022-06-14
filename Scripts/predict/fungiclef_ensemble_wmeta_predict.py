@@ -33,22 +33,6 @@ meta_cols = [ 'countryCode', 'level1Name', 'level2Name', 'locality', 'Substrate'
 
 # --------------------------------------- MODELS -----------------------------------------
 
-# Eff-B6
-model = EfficientNetB6(
-        include_top=False,
-        weights='imagenet',
-        input_shape=(*IMG_SIZE, 3)
-       )
-flatten = Flatten()
-new_layer2 = Dense(1604, activation='softmax', name='my_dense_2')
-meta_in = Input(shape=(len(meta_cols),))
-img_in = model.input
-out = new_layer2(Concatenate(axis=-1)([flatten(model.output), meta_in]))
-
-model_effb6 = Model((img_in, meta_in), out)
-model_effb6.summary()
-model_effb6.load_weights('weights/weights-efficientnetb6-wmeta/weights-epoch-3_002.h5')
-
 # Eff-B4
 model = EfficientNetB4(
         include_top=False,
@@ -65,6 +49,21 @@ model_effb4 = Model((img_in, meta_in), out)
 model_effb4.summary()
 model_effb4.load_weights('weights/weights-efficientnetb4-wmeta/weights-epoch-3_002.h5')
 
+# Eff-B6
+model = EfficientNetB6(
+        include_top=False,
+        weights='imagenet',
+        input_shape=(*IMG_SIZE, 3)
+       )
+flatten = Flatten()
+new_layer2 = Dense(1604, activation='softmax', name='my_dense_2')
+meta_in = Input(shape=(len(meta_cols),))
+img_in = model.input
+out = new_layer2(Concatenate(axis=-1)([flatten(model.output), meta_in]))
+
+model_effb6 = Model((img_in, meta_in), out)
+model_effb6.summary()
+model_effb6.load_weights('weights/weights-efficientnetb6-wmeta/weights-epoch-3_002.h5')
 
 # ResneXt101
 model = ResNeXt101(
@@ -86,7 +85,7 @@ model_resnext.load_weights('weights/weights-resnext101-wmeta/weights-epoch-2_008
 # ------------------------------------------------------------------------------------------
 # RUN PREDICTIONS
 
-op_file = open('effb6predictions_wmeta_3_002.csv', mode='w')
+op_file = open('effb4_effb6_resnext_wmeta_3002_2010_2008.csv', mode='w')
 op_writer = csv.writer(op_file, delimiter=',', quotechar='"')
 op_writer.writerow(['ObservationId', 'ClassId', 'Class_top3', 'Confidence_top3'])  
 skipping = 0
@@ -161,7 +160,29 @@ while not df.empty:
     # Make prediction in batches
     batch_images = np.array(batch_images)
     batch_meta_encoded = np.array(batch_meta_encoded)
-    predict_probs = np.sum(model2.predict([batch_images, batch_meta_encoded]), axis=0)/instance_cnt    
+
+    predict_probs = np.sum(
+        model_effb4.predict([batch_images, batch_meta_encoded]), 
+        axis=0
+    )/instance_cnt 
+
+    predict_probs = np.add(
+        predict_probs, 
+        np.sum(
+            model_effb6.predict([batch_images, batch_meta_encoded]), 
+            axis=0
+        )/instance_cnt
+    ) 
+
+    predict_probs = np.add(
+        predict_probs, 
+        np.sum(
+            model_resnext.predict([batch_images, batch_meta_encoded]), 
+            axis=0
+        )/instance_cnt
+    ) 
+
+    predict_probs /= 3  # For 3 models
     predicted_class = np.argmax(predict_probs)
     
     # Store in file
