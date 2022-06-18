@@ -47,7 +47,7 @@ out = new_layer2(Concatenate(axis=-1)([flatten(model.output), meta_in]))
 
 model_effb4 = Model((img_in, meta_in), out)
 model_effb4.summary()
-model_effb4.load_weights('weights/weights-efficientnetb4-wmeta/weights-epoch-3_002.h5')
+model_effb4.load_weights('weights/weights-efficientnetb4-wmeta/weights-epoch-2_005.h5')
 
 # Eff-B6
 model = EfficientNetB6(
@@ -63,7 +63,7 @@ out = new_layer2(Concatenate(axis=-1)([flatten(model.output), meta_in]))
 
 model_effb6 = Model((img_in, meta_in), out)
 model_effb6.summary()
-model_effb6.load_weights('weights/weights-efficientnetb6-wmeta/weights-epoch-3_002.h5')
+model_effb6.load_weights('weights/weights-efficientnetb6-wmeta/weights-epoch-2_005.h5')
 
 # ResneXt101
 model = ResNeXt101(
@@ -79,13 +79,13 @@ out = new_layer2(Concatenate(axis=-1)([flatten(model.output), meta_in]))
 
 model_resnext = Model((img_in, meta_in), out)
 model_resnext.summary()
-model_resnext.load_weights('weights/weights-resnext101-wmeta/weights-epoch-2_008.h5')
+model_resnext.load_weights('weights/weights-resnext101-wmeta/weights-epoch-3_001.h5')
 
 
 # ------------------------------------------------------------------------------------------
 # RUN PREDICTIONS
 
-op_file = open('effb4_effb6_resnext_wmeta_3002_2010_2008.csv', mode='w')
+op_file = open('effb4_effb6_resnext_wmeta_3002_2010_3001.csv', mode='w')
 op_writer = csv.writer(op_file, delimiter=',', quotechar='"')
 op_writer.writerow(['ObservationId', 'ClassId', 'Class_top3', 'Confidence_top3'])  
 skipping = 0
