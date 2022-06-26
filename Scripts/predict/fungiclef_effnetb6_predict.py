@@ -1,4 +1,4 @@
-from efficientnet.efficientnet.model import EfficientNetB4
+from efficientnet.efficientnet.model import EfficientNetB6
 
 import tensorflow as tf
 import keras.utils
@@ -24,7 +24,7 @@ from tensorflow.keras.layers import Dense, Flatten, Input
 from keras import backend as K
 
 #model = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(*IMG_SIZE, 3))
-model = EfficientNetB4(
+model = EfficientNetB6(
         include_top=False,
         weights='imagenet',
         input_shape=(*IMG_SIZE, 3)
@@ -49,7 +49,7 @@ model2.compile(
 
 #work from here
 
-model2.load_weights('weights/weights-efficientnetb4/weights-epoch-2_001.h5')
+model2.load_weights('weights/weights-efficientnetb6/weights-epoch-2_001.h5')
 
 '''modelPredictionsArray = []
 outputDF = pd.DataFrame(modelPredictionsArray, columns = ['ObservationId', 'class_id'])
@@ -60,7 +60,7 @@ outputDF.to_csv('/kaggle/working/predictions.csv', index=False) # making an empt
 #download and change
 
 
-op_file = open('effb4predictions_2_001.csv', mode='w')
+op_file = open('effb6predictions_2_001.csv', mode='w')
 op_writer = csv.writer(op_file, delimiter=',', quotechar='"')
 op_writer.writerow(['ObservationId', 'ClassId'])  
 skipping = 0
