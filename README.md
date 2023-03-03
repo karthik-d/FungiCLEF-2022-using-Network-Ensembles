@@ -41,7 +41,7 @@ If you find our work useful in your research, don't forget to cite us:
 - The boosting ensemble classifier is fed all the 8198 features to generate a probability distribution over all potential fungi species classes. 
 
 This workflow is depicted below,   
-<img alt="proposed-prediction-workflow" src="./assets/Figure-1_Prediction-Workflow.png" />
+<img alt="proposed-prediction-workflow" src="./assets/Figure-1_Prediction-Workflow.png" width="750" />
 
 ### Managing Out-of-Scope Classes
 
@@ -51,4 +51,17 @@ This workflow is depicted below,
 - First, a histogram of maximum prediction probabilities of the model for each observation in the test set is plotted. 
 
 The histogram for the best performing model instance is depeicted below,     
-<img alt="best-threshold-histogram" src="./assets/Figure-3_Lowest-Confidence.png" />
+<img alt="best-threshold-histogram" src="./assets/Figure-2_Highest-Confidence.png" width="750" />
+
+- The x-axis represents the maximum confidence values for predictions on the observations,
+while the y-axis tracks the frequency of these maximum confidence values. 
+- Subsequently, the x-axis point of 5% cumulative frequency is identified (denoted by the red-colored dotted-line above). 
+- Multiple points — typically, 2-4 points during experiments — on the left-hand side of this 5% quantile line are chosen as threshold values, and predictions are made based on each of these threshold values.
+
+### Conclusions and Future Scope
+
+- The ensembling approach was found to be an effective option for applying to data-intensive and high-complexity image classification tasks that are commonly released at LifeCLEF. 
+- The inclusion of contextual information showed a strong impact on the classification results — the F1-scores for the best models improved from 61.72% and 41.95% to 63.88% and 42.74%.
+- We further conjecture that training the individual models to convergence, and subsequently applying the boosting ensembler with
+hyperparameter tuning will culminate in a superior prediction performance, that exhausts the proposed architectures’ and methodology’s potential. 
+- In addition, approaches involving input image resolution variations, usage of alternative pre-trained weights [[A. Joly et al.](https://link.springer.com/chapter/10.1007/978-3-030-58219-7_23)], as well as the inclusion of custom training layers to the frozen base model when transfer learning [[M. Zhong et al.](https://www.sciencedirect.com/science/article/abs/pii/S0003682X20304795)] can greatly improve the quality of feature extraction. 
