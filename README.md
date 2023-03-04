@@ -1,6 +1,6 @@
 # FungiCLEF: Deep-learning for the Visual Classification of Fungi Species, 2022
 
-Scripts, figures and working notes for the participation in [FungiCLEF 2022](https://www.imageclef.org/FungiCLEF2022), part of the [LifeCLEF labs](https://www.imageclef.org/LifeCLEF2022) at the [13th CLEF Conference, 2022](https://clef2022.clef-initiative.eu/index.php).
+Scripts, figures, and working notes for the participation in [FungiCLEF 2022](https://www.imageclef.org/FungiCLEF2022), part of the [LifeCLEF labs](https://www.imageclef.org/LifeCLEF2022) at the [13th CLEF Conference, 2022](https://clef2022.clef-initiative.eu/index.php).
 
 **Implementation Stack**: Python, Keras/Tensorflow, XGBoost, Scikit.
 
@@ -14,9 +14,9 @@ The following references will help in reproducing this implementation and to ext
 
 ## Cite Us
 
-[Link to the Research Paper (preprint)](https://ceur-ws.org/Vol-3180/paper-162.pdf)
+[Link to the Research Paper](https://ceur-ws.org/Vol-3180/paper-162.pdf)
 
-If you find our work useful in your research, don't forget to cite us:
+If you find our work useful in your research, don't forget to cite us,
 
 ```
 @article{desingu2022classification,
@@ -34,11 +34,17 @@ If you find our work useful in your research, don't forget to cite us:
 
 ## Key Highlights
 
+- A deep learning -based feature extraction and subsequent boosting ensemble approach for fungi species classification is proposed.
+- Leverages state-of-the-art deep learning architectures such as ResNeXt and Efficient-Net among others and trains them by transfer learning onto a fungi image dataset for feature extraction.
+- Finally, integrates the output representation vectors with geographic metadata to train a gradient boosting ensemble classifier that predicts the fungi species. 
+- The authors trained multiple deep learning architectures, assessed their individual performance, and selected effective feature extraction models.
+
 ### Proposed Prediction Workflow
 
 - Each *observation* in the dataset is made up of numerous fungus photos and its contextual geographic information like nation, exact area where the photograph was taken on four layers, along with specific attributes like substrate and habitat. 
 - Each image in an observation is preprocessed before being fed through the two feature extraction networks to generate two 4096-element-long representation vectors. - These vectors are combined with numeric encoded nation, location at three-level precision, substrate, and habitat metadata for the image to produce a final vector with a size of 8198. 
 - The boosting ensemble classifier is fed all the 8198 features to generate a probability distribution over all potential fungi species classes. 
+- The class probability values collected for each image in an observation are averaged to obtain a single aggregate distribution of probabilities over all classes.
 
 This workflow is depicted below,   
 <img alt="proposed-prediction-workflow" src="./assets/Figure-1_Prediction-Workflow.png" width="750" />
@@ -57,6 +63,8 @@ The histogram for the best performing model instance is depeicted below,
 while the y-axis tracks the frequency of these maximum confidence values. 
 - Subsequently, the x-axis point of 5% cumulative frequency is identified (denoted by the red-colored dotted-line above). 
 - Multiple points — typically, 2-4 points during experiments — on the left-hand side of this 5% quantile line are chosen as threshold values, and predictions are made based on each of these threshold values.
+
+> A more detailed and mathematical treatment of the proposed strategy can be found [in our paper](https://ceur-ws.org/Vol-3180/paper-162.pdf)
 
 ### Conclusions and Future Scope
 
