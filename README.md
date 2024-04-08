@@ -2,21 +2,21 @@
 
 Scripts, figures, and working notes for the participation in [FungiCLEF 2022](https://www.imageclef.org/FungiCLEF2022), part of the [LifeCLEF labs](https://www.imageclef.org/LifeCLEF2022) at the [13th CLEF Conference, 2022](https://clef2022.clef-initiative.eu/index.php).
 
-**Implementation Stack**: Python, Keras/Tensorflow, XGBoost, Scikit.
+**Implementation Stack**: Python, Keras/Tensorflow, XGBoost, Scikit-learn.
 
 ## Quick Links
 
 The following references will help in reproducing this implementation and to extend the experiments for further analyses.
 
-- [Manuscript [PDF]](https://ceur-ws.org/Vol-3180/paper-162.pdf)
-- [Model Training Scripts](./Scripts/train)
-- [Concept and Dataset Description](https://www.imageclef.org/FungiCLEF2022)
+- [Research Paper [PDF]](https://ceur-ws.org/Vol-3180/paper-162.pdf).
+- [Model Training Scripts](./Scripts/train).
+- [Concept and Dataset Description](https://www.imageclef.org/FungiCLEF2022).
 
 ## Cite Us
 
-[Link to the Research Paper](https://ceur-ws.org/Vol-3180/paper-162.pdf)
+[Link to the Research Paper](https://ceur-ws.org/Vol-3180/paper-162.pdf).
 
-If you find our work useful in your research, don't forget to cite us,
+If you find our work useful in your research, don't forget to cite us!
 
 ```
 @article{desingu2022classification,
@@ -64,7 +64,7 @@ while the y-axis tracks the frequency of these maximum confidence values.
 - Subsequently, the x-axis point of 5% cumulative frequency is identified (denoted by the red-colored dotted-line above). 
 - Multiple points — typically, 2-4 points during experiments — on the left-hand side of this 5% quantile line are chosen as threshold values, and predictions are made based on each of these threshold values.
 
-> A more detailed and mathematical treatment of the proposed strategy can be found [in our paper](https://ceur-ws.org/Vol-3180/paper-162.pdf)
+> A more detailed and mathematical treatment of the proposed strategy can be found [in our paper](https://ceur-ws.org/Vol-3180/paper-162.pdf).
 
 ### Conclusions and Future Scope
 
@@ -72,4 +72,4 @@ while the y-axis tracks the frequency of these maximum confidence values.
 - The inclusion of contextual information showed a strong impact on the classification results — the F1-scores for the best models improved from 61.72% and 41.95% to 63.88% and 42.74%.
 - We further conjecture that training the individual models to convergence, and subsequently applying the boosting ensembler with
 hyperparameter tuning will culminate in a superior prediction performance, that exhausts the proposed architectures’ and methodology’s potential. 
-- In addition, approaches involving input image resolution variations, usage of alternative pre-trained weights [[A. Joly et al.](https://link.springer.com/chapter/10.1007/978-3-030-58219-7_23)], as well as the inclusion of custom training layers to the frozen base model when transfer learning [[M. Zhong et al.](https://www.sciencedirect.com/science/article/abs/pii/S0003682X20304795)] can greatly improve the quality of feature extraction. 
+- In addition, approaches involving input image resolution variations, usage of alternative pre-trained weights (see [A. Joly et al.](https://link.springer.com/chapter/10.1007/978-3-030-58219-7_23)), as well as the inclusion of custom training layers to the frozen base model when transfer learning (see [M. Zhong et al.](https://www.sciencedirect.com/science/article/abs/pii/S0003682X20304795)) can greatly improve the quality of feature extraction. 
